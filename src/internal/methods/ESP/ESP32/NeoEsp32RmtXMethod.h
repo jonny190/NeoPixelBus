@@ -28,6 +28,10 @@ License along with NeoPixel.  If not, see
 
 #if defined(ARDUINO_ARCH_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C2)
 
+// Needed for ESP_* macros that take a log_tag
+#include "esp_log.h"
+static const char* TAG = "NeoEsp32RmtX";
+
 #include <Arduino.h>
 #include "NeoEsp32RmtSpeed.h"
 
