@@ -36,7 +36,9 @@ static inline uint32_t getCycleCount(void)
 {
     uint32_t ccount;
 
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#if defined(CONFIG_IDF_TARGET_ESP32C5)
+    __asm__ __volatile__("csrr %0,0xC00":"=r" (ccount)); // standard RISC-V cycle counter
+#elif defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
     __asm__ __volatile__("csrr %0,0x7e2":"=r" (ccount));
     //ccount = esp_cpu_get_ccount();
 #else
@@ -114,13 +116,13 @@ bool IRAM_ATTR neoEspBitBangWriteSpacingPixels(const uint8_t* pixels,
     volatile uint32_t* setRegister;
     volatile uint32_t* clearRegister;
 
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
     if (pin < 32)
     {
         setRegister = &GPIO.out_w1ts.val;
         clearRegister = &GPIO.out_w1tc.val;
     }
-#if !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32H2)
+#if !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32H2)
     else
     {
         setRegister = &GPIO.out1_w1ts.val;
@@ -138,7 +140,7 @@ bool IRAM_ATTR neoEspBitBangWriteSpacingPixels(const uint8_t* pixels,
         setRegister = &GPIO.out1_w1ts.val;
         clearRegister = &GPIO.out1_w1tc.val;
     }
-#endif // defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
+#endif // defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
 
 #else // just ESP8266
     uint32_t setRegister = PERIPHS_GPIO_BASEADDR + GPIO_OUT_W1TS_ADDRESS;
